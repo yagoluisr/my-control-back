@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -8,4 +5,53 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+}
+
+model session {
+  id        Int      @id(map: "session_pk") @default(autoincrement())
+  userId    Int
+  token     String
+  createdAt DateTime @default(dbgenerated("'2023-01-28'::date")) @db.Date
+  user      user     @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "session_fk0")
+}
+
+model summary {
+  id               Int      @id(map: "summary_pk") @default(autoincrement())
+  userId           Int
+  salary           Int
+  expectedExpenses Int
+  createdAt        DateTime @default(dbgenerated("'2023-01-28'::date")) @db.Date
+  updatedAt        DateTime @db.Date
+  user             user     @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "summary_fk0")
+}
+
+model transactions {
+  id          Int      @id(map: "transactions_pk") @default(autoincrement())
+  userId      Int
+  value       Int
+  description String
+  date        DateTime @default(dbgenerated("'2023-01-28'::date")) @db.Date
+  type        Int
+  createdAt   DateTime @default(dbgenerated("'2023-01-28'::date")) @db.Date
+  updatedAt   DateTime @db.Date
+  user        user     @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "transactions_fk0")
+  types       types    @relation(fields: [type], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "transactions_fk1")
+}
+
+model types {
+  id           Int            @id(map: "types_pk") @default(autoincrement())
+  name         String
+  transactions transactions[]
+}
+
+model user {
+  id           Int            @id(map: "user_pk") @default(autoincrement())
+  name         String
+  email        String
+  password     String
+  createdAt    DateTime       @default(dbgenerated("'2023-01-28'::date")) @db.Date
+  updatedAt    DateTime       @db.Date
+  session      session[]
+  summary      summary[]
+  transactions transactions[]
 }
