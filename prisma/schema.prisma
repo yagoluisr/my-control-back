@@ -7,11 +7,13 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+
+
 model session {
   id        Int      @id(map: "session_pk") @default(autoincrement())
   userId    Int
   token     String
-  createdAt DateTime @default(dbgenerated("'2023-01-28'::date")) @db.Date
+  createdAt DateTime @default(now())
   user      user     @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "session_fk0")
 }
 
@@ -20,8 +22,8 @@ model summary {
   userId           Int
   salary           Int
   expectedExpenses Int
-  createdAt        DateTime @default(dbgenerated("'2023-01-28'::date")) @db.Date
-  updatedAt        DateTime @db.Date
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
   user             user     @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "summary_fk0")
 }
 
@@ -30,27 +32,35 @@ model transactions {
   userId      Int
   value       Int
   description String
-  date        DateTime @default(dbgenerated("'2023-01-28'::date")) @db.Date
+  date        DateTime 
   type        Int
-  createdAt   DateTime @default(dbgenerated("'2023-01-28'::date")) @db.Date
-  updatedAt   DateTime @db.Date
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
   user        user     @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "transactions_fk0")
   types       types    @relation(fields: [type], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "transactions_fk1")
 }
 
+enum TypeStatus {
+  CREDIT
+  DEBIT
+  INVESTMENT
+}
+
 model types {
   id           Int            @id(map: "types_pk") @default(autoincrement())
-  name         String
+  name         TypeStatus
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
   transactions transactions[]
 }
 
 model user {
   id           Int            @id(map: "user_pk") @default(autoincrement())
   name         String
-  email        String
+  email        String         @unique
   password     String
-  createdAt    DateTime       @default(dbgenerated("'2023-01-28'::date")) @db.Date
-  updatedAt    DateTime       @db.Date
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
   session      session[]
   summary      summary[]
   transactions transactions[]
